@@ -95,7 +95,7 @@ function filterByCategory() {
   renderTable(currentPage);
 }
 
-// Function to render the metadata table
+// Function to render the metadata table and display the result count
 function renderTable(page = 1, data = filteredMetadata) {
   const tbody = document.getElementById("metadataBody");
   tbody.innerHTML = ""; // Clear previous rows
@@ -104,6 +104,12 @@ function renderTable(page = 1, data = filteredMetadata) {
   const end = start + config.rowsPerPage;
   const pageData = data.slice(start, end);
 
+  // Update result count
+  document.getElementById(
+    "resultCount"
+  ).textContent = `Showing ${data.length} results`;
+
+  // Insert rows into the table
   pageData.forEach((item) => {
     const row = document.createElement("tr");
 
@@ -116,11 +122,11 @@ function renderTable(page = 1, data = filteredMetadata) {
     tbody.appendChild(row);
   });
 
+  // Update pagination info
   document.getElementById("pageInfo").textContent = `Page ${page}`;
   document.getElementById("prevBtn").disabled = page === 1;
   document.getElementById("nextBtn").disabled = end >= data.length;
 }
-
 // Search/filter function
 function filterTable() {
   const input = document.getElementById("searchInput").value.toLowerCase();
