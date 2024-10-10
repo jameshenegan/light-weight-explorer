@@ -138,7 +138,6 @@
   <body>
     <h1>Search Metadata</h1>
 
-    <!-- Dropdown for table selection -->
     <label for="tableSelect">Filter by Table: </label>
     <select id="tableSelect" onchange="filterByTable()">
       <option value="all">All Tables</option>
@@ -153,10 +152,8 @@
 
     <table id="metadataTable">
       <thead>
-        <tr>
-          <th>Table Name</th>
-          <th>Column Name</th>
-          <th>Column Description</th>
+        <tr id="tableHeaders">
+          <!-- Table headers will be dynamically generated here -->
         </tr>
       </thead>
       <tbody id="metadataBody">

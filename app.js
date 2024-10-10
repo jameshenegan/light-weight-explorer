@@ -1,69 +1,102 @@
-// JSON Data (for example purposes, you could fetch this from an actual file instead)
+// Configuration for attribute mapping and other options
+const config = {
+  tableAttributes: [
+    { key: "Table Category", displayName: "Category" },
+    { key: "Table Name", displayName: "Table" },
+    { key: "Variable Name", displayName: "Column" },
+    { key: "Description", displayName: "Column Description" },
+  ],
+  rowsPerPage: 5,
+};
+
+// Sample JSON data
 const metadata = [
   {
+    "Table Category": "User Data",
     "Table Name": "Users",
-    "Column Name": "UserID",
-    "Column Description": "Unique ID for each user",
+    "Variable Name": "UserID",
+    Description: "Unique ID for each user",
   },
   {
-    "Table Name": "Users",
-    "Column Name": "UserName",
-    "Column Description": "Username for each user",
-  },
-  {
+    "Table Category": "Order Data",
     "Table Name": "Orders",
-    "Column Name": "OrderID",
-    "Column Description": "Unique ID for each order",
+    "Variable Name": "OrderID",
+    Description: "Unique ID for each order",
   },
   {
+    "Table Category": "Order Data",
     "Table Name": "Orders",
-    "Column Name": "OrderDate",
-    "Column Description": "Date when the order was placed",
+    "Variable Name": "OrderID",
+    Description: "Unique ID for each order",
+  },
+  {
+    "Table Category": "Order Data",
+    "Table Name": "Orders",
+    "Variable Name": "OrderID",
+    Description: "Unique ID for each order",
+  },
+  {
+    "Table Category": "Order Data",
+    "Table Name": "Orders",
+    "Variable Name": "OrderID",
+    Description: "Unique ID for each order",
+  },
+  {
+    "Table Category": "Order Data",
+    "Table Name": "Orders",
+    "Variable Name": "OrderID",
+    Description: "Unique ID for each order",
   },
   // Add more objects as needed...
 ];
 
-// Pagination control
 let currentPage = 1;
-const rowsPerPage = 5;
-let filteredMetadata = [...metadata]; // Copy to track filtered results
+let filteredMetadata = [...metadata]; // Copy of metadata for filtering
 
-// Function to render the metadata table
+// Dynamically create table headers from config
+function createTableHeaders() {
+  const headerRow = document.getElementById("tableHeaders");
+  headerRow.innerHTML = ""; // Clear previous headers
+
+  config.tableAttributes.forEach((attr) => {
+    const th = document.createElement("th");
+    th.textContent = attr.displayName; // Use the display name from the config
+    headerRow.appendChild(th);
+  });
+}
+
+// Render the metadata table based on config and data
 function renderTable(page = 1, data = filteredMetadata) {
   const tbody = document.getElementById("metadataBody");
   tbody.innerHTML = ""; // Clear previous rows
 
-  // Determine the rows for the current page
-  const start = (page - 1) * rowsPerPage;
-  const end = start + rowsPerPage;
+  const start = (page - 1) * config.rowsPerPage;
+  const end = start + config.rowsPerPage;
   const pageData = data.slice(start, end);
 
-  // Insert rows into the table
   pageData.forEach((item) => {
     const row = document.createElement("tr");
-    row.innerHTML = `
-            <td>${item["Table Name"]}</td>
-            <td>${item["Column Name"]}</td>
-            <td>${item["Column Description"]}</td>
-        `;
+
+    config.tableAttributes.forEach((attr) => {
+      const td = document.createElement("td");
+      td.textContent = item[attr.key] || ""; // Use the key from the config to access the value
+      row.appendChild(td);
+    });
+
     tbody.appendChild(row);
   });
 
-  // Update pagination info
   document.getElementById("pageInfo").textContent = `Page ${page}`;
-
-  // Enable or disable pagination buttons based on page number
   document.getElementById("prevBtn").disabled = page === 1;
   document.getElementById("nextBtn").disabled = end >= data.length;
 }
 
-// Populate dropdown with unique table names
+// Populate the table filter dropdown
 function populateTableFilter() {
   const tableSelect = document.getElementById("tableSelect");
-  const tables = [...new Set(metadata.map((item) => item["Table Name"]))]; // Get unique table names
+  const uniqueTables = [...new Set(metadata.map((item) => item["Table Name"]))];
 
-  // Add each unique table name to the dropdown
-  tables.forEach((table) => {
+  uniqueTables.forEach((table) => {
     const option = document.createElement("option");
     option.value = table;
     option.textContent = table;
@@ -71,17 +104,14 @@ function populateTableFilter() {
   });
 }
 
-// Function to filter by table
+// Filter table rows by selected table
 function filterByTable() {
   const selectedTable = document.getElementById("tableSelect").value;
-
-  // Filter metadata based on the selected table or reset if 'all' is selected
   filteredMetadata =
     selectedTable === "all"
       ? [...metadata]
       : metadata.filter((item) => item["Table Name"] === selectedTable);
 
-  // Reset to the first page of filtered results
   currentPage = 1;
   renderTable(currentPage);
 }
@@ -89,16 +119,12 @@ function filterByTable() {
 // Search/filter function
 function filterTable() {
   const input = document.getElementById("searchInput").value.toLowerCase();
-
-  // Perform search on filteredMetadata
-  const searchedData = filteredMetadata.filter(
-    (item) =>
-      item["Table Name"].toLowerCase().includes(input) ||
-      item["Column Name"].toLowerCase().includes(input) ||
-      item["Column Description"].toLowerCase().includes(input)
+  const searchedData = filteredMetadata.filter((item) =>
+    config.tableAttributes.some(
+      (attr) => item[attr.key] && item[attr.key].toLowerCase().includes(input)
+    )
   );
 
-  // Reset to the first page of search results
   currentPage = 1;
   renderTable(currentPage, searchedData);
 }
@@ -112,12 +138,13 @@ function prevPage() {
 }
 
 function nextPage() {
-  if (currentPage * rowsPerPage < filteredMetadata.length) {
+  if (currentPage * config.rowsPerPage < filteredMetadata.length) {
     currentPage++;
     renderTable(currentPage);
   }
 }
 
 // Initial setup
+createTableHeaders(); // Create table headers dynamically
 populateTableFilter(); // Populate the table dropdown with unique table names
 renderTable(); // Render the table with the full dataset
