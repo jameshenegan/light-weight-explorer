@@ -25,7 +25,6 @@ const metadata = [
     "Variable Name": "OrderID",
     Description: "Unique ID for each order",
   },
-  // Add more objects as needed...
 ];
 
 let currentPage = 1;
