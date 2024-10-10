@@ -1,15 +1,17 @@
-// Configuration for attribute mapping and other options
 const config = {
   tableAttributes: [
-    { key: "Table Category", displayName: "Category" },
-    { key: "Table Name", displayName: "Table" },
-    { key: "Variable Name", displayName: "Column" },
-    { key: "Description", displayName: "Column Description" },
+    { key: "Table Category", displayName: "Category", isCategorical: true },
+    { key: "Table Name", displayName: "Table", isCategorical: true },
+    { key: "Variable Name", displayName: "Column", isCategorical: false },
+    {
+      key: "Description",
+      displayName: "Column Description",
+      isCategorical: false,
+    },
   ],
   rowsPerPage: 5,
 };
 
-// Sample JSON data
 const metadata = [
   {
     "Table Category": "User Data",
@@ -23,35 +25,11 @@ const metadata = [
     "Variable Name": "OrderID",
     Description: "Unique ID for each order",
   },
-  {
-    "Table Category": "Order Data",
-    "Table Name": "Orders",
-    "Variable Name": "OrderID",
-    Description: "Unique ID for each order",
-  },
-  {
-    "Table Category": "Order Data",
-    "Table Name": "Orders",
-    "Variable Name": "OrderID",
-    Description: "Unique ID for each order",
-  },
-  {
-    "Table Category": "Order Data",
-    "Table Name": "Orders",
-    "Variable Name": "OrderID",
-    Description: "Unique ID for each order",
-  },
-  {
-    "Table Category": "Order Data",
-    "Table Name": "Orders",
-    "Variable Name": "OrderID",
-    Description: "Unique ID for each order",
-  },
   // Add more objects as needed...
 ];
 
 let currentPage = 1;
-let filteredMetadata = [...metadata]; // Copy of metadata for filtering
+let filteredMetadata = [...metadata];
 
 // Dynamically create table headers from config
 function createTableHeaders() {
@@ -65,7 +43,59 @@ function createTableHeaders() {
   });
 }
 
-// Render the metadata table based on config and data
+// Dynamically create dropdowns for categorical columns
+function createDropdowns() {
+  const dropdownsDiv = document.getElementById("dropdowns");
+  dropdownsDiv.innerHTML = ""; // Clear any existing dropdowns
+
+  config.tableAttributes.forEach((attr) => {
+    if (attr.isCategorical) {
+      const uniqueValues = [...new Set(metadata.map((item) => item[attr.key]))];
+
+      const label = document.createElement("label");
+      label.textContent = `Filter by ${attr.displayName}: `;
+
+      const select = document.createElement("select");
+      select.id = attr.key;
+      select.onchange = filterByCategory;
+
+      const allOption = document.createElement("option");
+      allOption.value = "all";
+      allOption.textContent = `All ${attr.displayName}s`;
+      select.appendChild(allOption);
+
+      uniqueValues.forEach((value) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+
+      dropdownsDiv.appendChild(label);
+      dropdownsDiv.appendChild(select);
+    }
+  });
+}
+
+// Filter the table rows based on selected categorical values
+function filterByCategory() {
+  let filtered = [...metadata];
+
+  config.tableAttributes.forEach((attr) => {
+    if (attr.isCategorical) {
+      const selectedValue = document.getElementById(attr.key).value;
+      if (selectedValue !== "all") {
+        filtered = filtered.filter((item) => item[attr.key] === selectedValue);
+      }
+    }
+  });
+
+  filteredMetadata = filtered;
+  currentPage = 1;
+  renderTable(currentPage);
+}
+
+// Function to render the metadata table
 function renderTable(page = 1, data = filteredMetadata) {
   const tbody = document.getElementById("metadataBody");
   tbody.innerHTML = ""; // Clear previous rows
@@ -89,31 +119,6 @@ function renderTable(page = 1, data = filteredMetadata) {
   document.getElementById("pageInfo").textContent = `Page ${page}`;
   document.getElementById("prevBtn").disabled = page === 1;
   document.getElementById("nextBtn").disabled = end >= data.length;
-}
-
-// Populate the table filter dropdown
-function populateTableFilter() {
-  const tableSelect = document.getElementById("tableSelect");
-  const uniqueTables = [...new Set(metadata.map((item) => item["Table Name"]))];
-
-  uniqueTables.forEach((table) => {
-    const option = document.createElement("option");
-    option.value = table;
-    option.textContent = table;
-    tableSelect.appendChild(option);
-  });
-}
-
-// Filter table rows by selected table
-function filterByTable() {
-  const selectedTable = document.getElementById("tableSelect").value;
-  filteredMetadata =
-    selectedTable === "all"
-      ? [...metadata]
-      : metadata.filter((item) => item["Table Name"] === selectedTable);
-
-  currentPage = 1;
-  renderTable(currentPage);
 }
 
 // Search/filter function
@@ -146,5 +151,5 @@ function nextPage() {
 
 // Initial setup
 createTableHeaders(); // Create table headers dynamically
-populateTableFilter(); // Populate the table dropdown with unique table names
+createDropdowns(); // Create dropdowns for categorical columns
 renderTable(); // Render the table with the full dataset
