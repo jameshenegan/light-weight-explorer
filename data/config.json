@@ -1,0 +1,17 @@
+{
+  "tableAttributes": [
+    {
+      "key": "Table Category",
+      "displayName": "Category",
+      "isCategorical": true
+    },
+    { "key": "Table Name", "displayName": "Table", "isCategorical": true },
+    { "key": "Variable Name", "displayName": "Column", "isCategorical": false },
+    {
+      "key": "Description",
+      "displayName": "Column Description",
+      "isCategorical": false
+    }
+  ],
+  "rowsPerPage": 5
+}

@@ -1,34 +1,27 @@
-const config = {
-  tableAttributes: [
-    { key: "Table Category", displayName: "Category", isCategorical: true },
-    { key: "Table Name", displayName: "Table", isCategorical: true },
-    { key: "Variable Name", displayName: "Column", isCategorical: false },
-    {
-      key: "Description",
-      displayName: "Column Description",
-      isCategorical: false,
-    },
-  ],
-  rowsPerPage: 5,
-};
-
-const metadata = [
-  {
-    "Table Category": "User Data",
-    "Table Name": "Users",
-    "Variable Name": "UserID",
-    Description: "Unique ID for each user",
-  },
-  {
-    "Table Category": "Order Data",
-    "Table Name": "Orders",
-    "Variable Name": "OrderID",
-    Description: "Unique ID for each order",
-  },
-];
-
+let config = {};
+let metadata = [];
 let currentPage = 1;
-let filteredMetadata = [...metadata];
+let filteredMetadata = [];
+
+// Fetch config and metadata
+async function loadConfigAndMetadata() {
+  try {
+    const configResponse = await fetch("data/config.json");
+    config = await configResponse.json();
+
+    const metadataResponse = await fetch("data/metadata.json");
+    metadata = await metadataResponse.json();
+
+    filteredMetadata = [...metadata];
+
+    // Initial setup
+    createTableHeaders();
+    createDropdowns();
+    renderTable();
+  } catch (error) {
+    console.error("Error loading data:", error);
+  }
+}
 
 // Dynamically create table headers from config
 function createTableHeaders() {
@@ -126,18 +119,6 @@ function renderTable(page = 1, data = filteredMetadata) {
   document.getElementById("prevBtn").disabled = page === 1;
   document.getElementById("nextBtn").disabled = end >= data.length;
 }
-// Search/filter function
-function filterTable() {
-  const input = document.getElementById("searchInput").value.toLowerCase();
-  const searchedData = filteredMetadata.filter((item) =>
-    config.tableAttributes.some(
-      (attr) => item[attr.key] && item[attr.key].toLowerCase().includes(input)
-    )
-  );
-
-  currentPage = 1;
-  renderTable(currentPage, searchedData);
-}
 
 // Pagination controls
 function prevPage() {
@@ -154,7 +135,18 @@ function nextPage() {
   }
 }
 
-// Initial setup
-createTableHeaders(); // Create table headers dynamically
-createDropdowns(); // Create dropdowns for categorical columns
-renderTable(); // Render the table with the full dataset
+// Search/filter function
+function filterTable() {
+  const input = document.getElementById("searchInput").value.toLowerCase();
+  const searchedData = filteredMetadata.filter((item) =>
+    config.tableAttributes.some(
+      (attr) => item[attr.key] && item[attr.key].toLowerCase().includes(input)
+    )
+  );
+
+  currentPage = 1;
+  renderTable(currentPage, searchedData);
+}
+
+// Load config and metadata on page load
+loadConfigAndMetadata();

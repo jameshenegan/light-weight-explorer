@@ -1,0 +1,14 @@
+[
+  {
+    "Table Category": "User Data",
+    "Table Name": "Users",
+    "Variable Name": "UserID",
+    "Description": "Unique ID for each user"
+  },
+  {
+    "Table Category": "Order Data",
+    "Table Name": "Orders",
+    "Variable Name": "OrderID",
+    "Description": "Unique ID for each order"
+  }
+]
